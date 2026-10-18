@@ -1,0 +1,6 @@
+[build]
+  command = "npm run build"
+  publish = "_site"
+
+# Posts you write in the /admin panel are saved to GitHub, which triggers
+# an automatic rebuild here. You never upload a file by hand again.
