@@ -1,0 +1,150 @@
+---
+layout: false
+permalink: /index.html
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Notes</title>
+<meta name="description" content="A personal blog for professional ideas and a-day-in lifestyle posts.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap masthead">
+    <div class="brand">
+      <button class="mark" id="home">Field Notes</button>
+      <span class="tag">ideas &amp; days</span>
+    </div>
+    <button class="theme-btn" id="theme" aria-label="Toggle theme">Dark</button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <section class="intro">
+    <p class="byline">Written by you · Since 2026</p>
+    <h1>A place for the thinking and the living.</h1>
+    <p>Half of this is the work: ideas I'm chewing on, things I've learned the hard way, opinions I'm still testing. The other half is the texture of a life — a day in a city, a day at a desk, a day learning something new.</p>
+  </section>
+
+  <div class="filters" role="group" aria-label="Filter posts">
+    <button class="chip" data-filter="all" aria-pressed="true">All</button>
+    <button class="chip" data-filter="ideas" aria-pressed="false">Ideas</button>
+    <button class="chip" data-filter="daily" aria-pressed="false">A Day In</button>
+  </div>
+
+  <ul class="feed" id="feed">
+    {% for post in collections.posts %}
+    <li class="post" data-kind="{{ post.data.kind }}">
+      <button class="post-head" aria-expanded="false">
+        <div class="post-meta">
+          <span class="kind {{ post.data.kind }}">{% if post.data.kind == "ideas" %}Idea{% else %}A Day In{% endif %}</span>
+          <span class="date">{{ post.date | readableDate }}</span>
+        </div>
+        <h2>{{ post.data.title }}</h2>
+        <p class="dek">{{ post.data.dek }}</p>
+        <span class="readmore">Read →</span>
+      </button>
+      <div class="article" hidden>
+        {{ post.templateContent | safe }}
+        <button class="collapse" type="button">Close article</button>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% if collections.posts.length == 0 %}
+  <p class="empty">No posts yet. Open <strong>/admin</strong> to write your first one.</p>
+  {% endif %}
+  <p class="empty" id="filterEmpty" hidden>Nothing here yet — these posts are on their way.</p>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="foot-grid">
+      <span class="foot-brand">Field Notes</span>
+      <div class="foot-links">
+        <a href="mailto:you@example.com">Email</a>
+        <a href="/admin/">Write</a>
+      </div>
+    </div>
+    <p class="copyright">© 2026 — your name here.</p>
+  </div>
+</footer>
+
+<script>
+  // THEME TOGGLE
+  (function () {
+    var btn = document.getElementById('theme');
+    var saved;
+    try { saved = localStorage.getItem('fn-theme'); } catch (e) {}
+    function apply(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      btn.textContent = t === 'dark' ? 'Light' : 'Dark';
+    }
+    if (saved) apply(saved);
+    else {
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      btn.textContent = prefersDark ? 'Light' : 'Dark';
+    }
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme');
+      if (!cur) {
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        cur = prefersDark ? 'dark' : 'light';
+      }
+      var next = cur === 'dark' ? 'light' : 'dark';
+      apply(next);
+      try { localStorage.setItem('fn-theme', next); } catch (e) {}
+    });
+  })();
+
+  // EXPAND / COLLAPSE POSTS
+  document.querySelectorAll('.post').forEach(function (post) {
+    var head = post.querySelector('.post-head');
+    var article = post.querySelector('.article');
+    var readmore = post.querySelector('.readmore');
+    var collapse = post.querySelector('.collapse');
+    function toggle(open) {
+      post.classList.toggle('open', open);
+      article.hidden = !open;
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (readmore) readmore.textContent = open ? 'Close ✕' : 'Read →';
+    }
+    head.addEventListener('click', function () { toggle(!post.classList.contains('open')); });
+    if (collapse) collapse.addEventListener('click', function () {
+      toggle(false);
+      head.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // FILTERS
+  document.querySelectorAll('.chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var f = chip.dataset.filter;
+      document.querySelectorAll('.chip').forEach(function (c) {
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+      var shown = 0;
+      document.querySelectorAll('.post').forEach(function (post) {
+        var match = (f === 'all' || post.dataset.kind === f);
+        post.hidden = !match;
+        if (match) shown++;
+      });
+      var emptyMsg = document.getElementById('filterEmpty');
+      if (emptyMsg) emptyMsg.hidden = (shown > 0);
+    });
+  });
+
+  // NAV
+  document.getElementById('home').addEventListener('click', function () {
+    document.querySelector('.chip[data-filter="all"]').click();
+    document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>

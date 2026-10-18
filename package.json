@@ -1,0 +1,13 @@
+{
+  "name": "field-notes",
+  "version": "1.0.0",
+  "description": "A personal blog for professional ideas and a-day-in lifestyle posts.",
+  "scripts": {
+    "build": "eleventy",
+    "start": "eleventy --serve"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}
